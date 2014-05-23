@@ -221,7 +221,7 @@ This message would have been sent to the following recipients:
 %s
 --------------------------------------------------------------
 %s""" % (toaddr, content)
-        toaddr = CFG_SITE_ADMIN_EMAIL
+        toaddr = [CFG_SITE_ADMIN_EMAIL]
         usebcc = False
     body = forge_email(fromaddr, toaddr, subject, content, html_content,
                        html_images, usebcc, header, footer, html_header,
