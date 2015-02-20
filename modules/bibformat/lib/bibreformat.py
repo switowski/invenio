@@ -353,11 +353,11 @@ def task_run_core():
         if task_has_option("last"):
             recids += outdated_caches(fmt, last_updated)
 
-        if task_has_option('ignore_without'):
-            without_fmt = intbitset()
-        else:
+        if task_has_option('with_missing_formats'):
             without_fmt = missing_caches(fmt)
             recids += without_fmt
+        else:
+            without_fmt = intbitset()
 
         cli_recids = split_cli_ids_arg(task_get_option('recids', ''))
         recids += cli_recids
@@ -424,7 +424,7 @@ Reformatting options:
   -f,  --field          \t Force reformatting records by field
   -p,  --pattern        \t Force reformatting records by pattern
   -i,  --id             \t Force reformatting records by record id(s)
-  --no-missing          \t Ignore reformatting records without format
+  --missing-formats     \t Format also records without format
 Pattern options:
   -m,  --matching       \t Specify if pattern is exact (e), regular expression (r),
                         \t partial (p), any of the words (o) or all of the words (a)
@@ -439,7 +439,7 @@ Pattern options:
                                 "format=",
                                 "noprocess",
                                 "id=",
-                                "no-missing"]),
+                                "missing-formats"]),
               task_submit_check_options_fnc=task_submit_check_options,
               task_submit_elaborate_specific_parameter_fnc=
                  task_submit_elaborate_specific_parameter,
@@ -465,8 +465,8 @@ def task_submit_elaborate_specific_parameter(key, value, opts, args):  # pylint:
     """
     if key in ("-a", "--all"):
         task_set_option("all", 1)
-    elif key in ("--no-missing", ):
-        task_set_option("ignore_without", 1)
+    elif key in ("--missing-formats", ):
+        task_set_option("with_missing_formats", 1)
     elif key in ("-c", "--collection"):
         task_set_option("collection", value)
     elif key in ("-n", "--noprocess"):
