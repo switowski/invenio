@@ -2968,7 +2968,10 @@ If you wish to enter a custom author please use this format: &quot;<span style="
 <button id="select_author_button" style="vertical-align:bottom; height:40px;">Add Author</button>
 <script>
 $(document).ready(function(){
-    $( "#select_author_button" ).click(AppendAuthorToAuthorHiddenInput);
+    $( "#select_author_button" ).on('click', function(event){
+      event.preventDefault();
+      AppendAuthorToAuthorHiddenInput();
+      });
 });
 </script>"""
         else:
