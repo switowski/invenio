@@ -27,9 +27,10 @@ from flask import make_response, request
 from flask.ext.login import current_user
 from flask.ext.restful import Resource, abort
 
-from invenio.ext.restful import pagination
+from invenio.ext.restful import pagination, require_oauth_scopes
 from invenio.modules.formatter import format_record
 from invenio.modules.formatter.registry import output_formats
+from invenio.modules.uploader.api import run
 
 from .errors import RecordDeletedError, RecordError, \
     RecordForbiddenViewError, RecordNotFoundError, \
@@ -125,18 +126,30 @@ class RecordResource(BaseRecordResource):
         return (result, 200)
 
     def post(self, record_id):
-        abort(405)
+        # POST is not possible here (POST doesn't allow resource ID).
+        # User probably wants to either send PUT request to RecordResource
+        # or POST to RecordListResource
+        abort(404)
 
     def head(self, record_id):
+        # the same as GET but doesn't return the message body
         abort(405)
 
     def put(self, record_id):
+        # PUT vs POST: http://restcookbook.com/HTTP%20Methods/put-vs-post/
+        # old input-replace --force mode
         abort(405)
 
     def patch(self, record_id):
+        # old correct mode
         abort(405)
 
     def options(self, record_id):
+        # returns a list of possible RESTful options
+        abort(405)
+
+    def delete(self, record_id):
+        # TODO: should it delete the whole record or only the fields specified in MARCXML ?
         abort(405)
 
 
@@ -221,16 +234,50 @@ class RecordListResource(BaseRecordResource):
             headers[link_header[0]] = link_header[1]
         return (json.dumps(records_to_return), 200, headers)
 
+    @require_oauth_scopes('records:actions')
     def post(self):
-        abort(405)
+        # PUT vs POST: http://restcookbook.com/HTTP%20Methods/put-vs-post/
+        # old insert mode
+        # Get the file with marcxml/json
+        uploaded_file = request.files['file']
+        uploaded_file_content = uploaded_file.read()
+
+        file_format = request.args.get('format', 'marc')
+
+        # Pass the file to the uploader.run() function
+        run('post', uploaded_file_content, file_format)
+        # Since the run is not returning any message yet, let's assume that
+        # each upload is successful
+        return ("Successfully uploaded new records", 200)
 
     def head(self):
         abort(405)
 
     def put(self, record_id):
-        abort(405)
+        # Get the file with marcxml/json
+        uploaded_file = request.files['file']
+        uploaded_file_content = uploaded_file.read()
+
+        file_format = request.args.get('format', 'marc')
+
+        # Pass the file to the uploader.run() function
+        run('put', uploaded_file_content, file_format)
+        # Since the run is not returning any message yet, let's assume that
+        # each upload is successful
+        return ("Successfully replaced records", 200)
 
     def patch(self, record_id):
+        # Get the file with marcxml/json
+        uploaded_file = request.files['file']
+        uploaded_file_content = uploaded_file.read()
+
+        file_format = request.args.get('format', 'marc')
+
+        # Pass the file to the uploader.run() function
+        run('patch', uploaded_file_content, file_format)
+        # Since the run is not returning any message yet, let's assume that
+        # each upload is successful
+        return ("Successfully updated records", 200)
         abort(405)
 
     def options(self, record_id):
@@ -247,3 +294,12 @@ def setup_app(app, api):
         RecordListResource,
         '/api/records/'
     )
+    # Register scopes
+    with app.app_context():
+        from invenio.modules.oauth2server.models import Scope
+        from invenio.modules.oauth2server.registry import scopes
+        scopes.register(Scope(
+            'records:actions',
+            group='Records',
+            help_text='Allows inserting/editing/deleting records',
+        ))
