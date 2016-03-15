@@ -798,7 +798,14 @@ class Template:
                        }
             else:
                 out += """ if (tester2()) {
-                             $(this).attr("disabled", true);
+                             /*
+                              * The ``name`` attribute is hardcoded
+                              * because otherwise we should pass the reference
+                              * ``this`` of the button to all *_END elements.
+                              * Additionaly it seems all the submitions have
+                              * the ``name='endS'`` in common in their buttons
+                              */
+                             $('[name=endS]').attr('disabled', true);
                              document.forms[0].action="/submit";
                              document.forms[0].step.value=1;
                              user_must_confirm_before_leaving_page = false;
