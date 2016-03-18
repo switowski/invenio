@@ -26,11 +26,13 @@ __lastupdated__ = """$Date$"""
 import urllib
 from invenio.webinterface_handler import wash_urlargd, WebInterfaceDirectory
 from invenio.access_control_engine import acc_authorize_action
-from invenio.config import \
-     CFG_SITE_URL, \
-     CFG_SITE_SECURE_URL, \
-     CFG_SITE_LANG, \
-     CFG_CERN_SITE
+from invenio.config import (
+    CFG_CERN_SITE,
+    CFG_SITE_LANG,
+    CFG_SITE_SECURE_URL,
+    CFG_SITE_URL,
+    CFG_WEBJOURNAL_REDIRECT_ARTICLES_OF_DELETED_CATEGORIES
+)
 from invenio.webuser import getUid
 from invenio.urlutils import redirect_to_url
 from invenio.errorlib import register_exception
@@ -224,6 +226,16 @@ class WebInterfaceJournalPages(WebInterfaceDirectory):
             register_exception(req=req)
             return e.user_box(req)
         except InvenioWebJournalNoCategoryError, e:
+            # If the category is one of the removed ones redirect to article
+            # page instead of throing an error
+            if category:
+                if category in CFG_WEBJOURNAL_REDIRECT_ARTICLES_OF_DELETED_CATEGORIES:
+                    redirect_to_url(
+                        req,
+                        '{0}/record/{1}/?ln={2}'.format(
+                            CFG_SITE_URL, article_id, argd.get('ln')
+                        )
+                    )
             register_exception(req=req)
             return e.user_box(req)
         except InvenioWebJournalJournalIdNotFoundDBError, e:
