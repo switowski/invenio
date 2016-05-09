@@ -1,5 +1,5 @@
 # This file is part of Invenio.
-# Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2015 CERN.
+# Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -115,6 +115,7 @@ from invenio.shellutils import mymkdir
 from invenio.websearch_yoursearches import perform_request_yoursearches_display
 from invenio.webstat import register_customevent
 from invenio.obelixutils import obelix, clean_user_info
+from invenio.recommender import get_recommended_records_with_metadata
 
 import invenio.template
 websearch_templates = invenio.template.load('websearch')
@@ -207,7 +208,8 @@ class WebInterfaceRecordPages(WebInterfaceDirectory):
 
     _exports = ['', 'files', 'reviews', 'comments', 'usage', 'references',
                 'export', 'citations', 'holdings', 'edit', 'keywords',
-                'multiedit', 'merge', 'plots', 'linkbacks', 'hepdata']
+                'multiedit', 'merge', 'plots', 'linkbacks', 'hepdata',
+                'recommendations']
 
     #_exports.extend(output_formats)
 
@@ -230,6 +232,7 @@ class WebInterfaceRecordPages(WebInterfaceDirectory):
         self.edit = WebInterfaceEditPages(self.recid)
         self.merge = WebInterfaceMergePages(self.recid)
         self.linkbacks = WebInterfaceRecordLinkbacksPages(self.recid)
+        self.recommendations = WebInterfaceRecordRecommendations(self.recid)
 
         return
 
@@ -318,6 +321,50 @@ class WebInterfaceRecordPages(WebInterfaceDirectory):
 
     # Return the same page wether we ask for /CFG_SITE_RECORD/123 or /CFG_SITE_RECORD/123/
     index = __call__
+
+
+class WebInterfaceRecordRecommendations(WebInterfaceDirectory):
+    """Handling of a /CFG_SITE_RECORD/<recid>/recommendations URL fragment."""
+
+    _exports = ['']
+
+    def __init__(self, recid):
+        self.recid = recid
+
+    def __call__(self, req, form):
+        """Called in case of URLs like /CFG_SITE_RECORD/123/recommendations."""
+        req.content_type = 'application/json'
+
+        user_info = collect_user_info(req)
+        uid = user_info['uid']
+
+        if uid == -1 or CFG_ACCESS_CONTROL_LEVEL_SITE > 1:
+            return {'status': 'error', "code": 1, "message": "Not authorized"}
+
+        (auth_code, auth_message) = check_user_can_view_record(user_info,
+                                                               self.recid)
+        if auth_code > 0:
+            # Not authorized
+            return {'status': 'error', "code": 1, "message": "Not authorized"}
+
+        result = {}
+        result['items'] = get_recommended_records_with_metadata(self.recid,
+                                                                maximum=3)
+        result['loggedin'] = True if uid > 0 else False
+        result['status'] = 'ok'
+
+        try:
+            output = json.dumps(result)
+        except UnicodeDecodeError as e:
+            e.level = logging.WARN
+            register_exception(alert_admin=True, prefix="UnicodeDecodeError, "
+                               "Record needs to be fixed")
+            result = {'status': 'error', "code": 2,
+                      "message": "UnicodeDecodeError"}
+            output = json.dumps(result)
+
+        return output
+
 
 class WebInterfaceRecordRestrictedPages(WebInterfaceDirectory):
     """ Handling of a /record-restricted/<recid> URL fragment """
