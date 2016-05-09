@@ -106,7 +106,8 @@ pylib_DATA = __init__.py \
              filedownloadutils.py \
              filedownloadutils_unit_tests.py \
              viafutils.py \
-             elasticsearch_logging.py
+             elasticsearch_logging.py \
+             obelixutils.py
 
 jsdir=$(localstatedir)/www/js
 
