@@ -2,7 +2,7 @@
 # $Id: bfe_webjournal_MainArticleOverview.py,v 1.28 2009/02/12 10:00:57 jerome Exp $
 #
 # This file is part of Invenio.
-# Copyright (C) 2009, 2010, 2011 CERN.
+# Copyright (C) 2009, 2010, 2011, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -419,9 +419,9 @@ def _get_feature_text(record, language):
         except:
             return ''
 
-        match_obj = re.search(header_pattern, article)
+        match_obj = re.search(header_pattern2, article)
         if not match_obj:
-            match_obj = re.search(header_pattern2, article)
+            match_obj = re.search(header_pattern, article)
         try:
             header_text = match_obj.group("header")
             header_text = washer.wash(html_buffer=header_text,
