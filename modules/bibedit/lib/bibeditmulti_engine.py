@@ -418,7 +418,7 @@ def perform_request_test_search(search_criteria, update_commands, output_format,
 
     if collection == "Any collection":
         collection = ""
-    record_IDs = search_engine.perform_request_search(p=search_criteria, c=collection, req=req)
+    record_IDs = search_engine.perform_request_search(p=search_criteria, c=collection)
 
     # initializing checked_records if not initialized yet or empty
     if checked_records is None or not checked_records:
@@ -636,7 +636,7 @@ def _submit_changes_to_bibupload(search_criteria, update_commands, upload_mode, 
     """
     if collection == "Any collection":
         collection = ""
-    record_IDs = search_engine.perform_request_search(p=search_criteria, c=collection, req=req)
+    record_IDs = search_engine.perform_request_search(p=search_criteria, c=collection)
     num_records = len(record_IDs)
 
     updated_records = []
