@@ -26,14 +26,6 @@ from invenio.dateutils import convert_datestruct_to_datetext
 from invenio.dbquery import run_sql
 
 
-# CREATE TABLE `swrCLIENTTEMPSUBMISSION` (
-#   `id` varchar(128) NOT NULL,
-#   `object` longblob NOT NULL,
-#   `last_updated` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-#   PRIMARY KEY (`id`)
-# )
-
-
 def store_temp_submission(
     sid,
     sobject_blob
@@ -122,19 +114,6 @@ def delete_temp_submission(
     res = run_sql(query, params)
 
     return res
-
-
-# CREATE TABLE `swrCLIENTSUBMISSION` (
-#   `id_user` int(15) unsigned NOT NULL,
-#   `id_record` mediumint(8) unsigned NOT NULL,
-#   `id_server` int(11) unsigned NOT NULL,
-#   `url_alternate` varchar(256) NOT NULL DEFAULT '',
-#   `url_edit` varchar(256) NOT NULL DEFAULT '',
-#   `status` varchar(256) NOT NULL DEFAULT '',
-#   `submitted` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-#   `last_updated` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-#   PRIMARY KEY (`id_record`,`id_server`)
-# )
 
 
 def archive_submission(
@@ -241,20 +220,6 @@ def get_submissions(
     result = run_sql(query, params, with_dict=with_dict)
 
     return result
-
-
-# CREATE TABLE `swrCLIENTSERVER` (
-#  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-#  `name` varchar(64) NOT NULL,
-#  `engine` varchar(64) NOT NULL,
-#  `username` varchar(64) NOT NULL,
-#  `password` varchar(64) NOT NULL,
-#  `email` varchar(64) NOT NULL,
-#  `service_document_parsed` longblob,
-#  `update_frequency` varchar(16) NOT NULL,
-#  `last_updated` timestamp DEFAULT 0,
-#  PRIMARY KEY (`id`)
-# )
 
 
 def get_servers(
