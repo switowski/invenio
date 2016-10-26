@@ -353,7 +353,14 @@ if CFG_CERN_SITE:
         register_exception(alert_admin=True, subject='EMERGENCE')
         WebInterfaceAPIPages = WebInterfaceDumbPages
 
-    cds_exports = ['cdslib', 'setlink', 'images', 'video', 'api', 'yellowrep']
+    try:
+        from invenio.webnews_webinterface import WebInterfaceWebNewsPages
+    except:
+        register_exception(alert_admin=True, subject='EMERGENCY')
+        WebInterfaceWebNewsPages = WebInterfaceDumbPages
+
+    cds_exports = ['cdslib', 'setlink', 'images', 'video',
+                   'api', 'yellowrep', 'news']
 else:
     cds_exports = []
 
@@ -477,7 +484,7 @@ class WebInterfaceInvenio(WebInterfaceSearchInterfacePages):
             images = WebInterfaceImagesPages()
             video = WebInterfaceEmbedVideo()
             api = WebInterfaceAPIPages()
-
+            news = WebInterfaceDisabledPages()
     else:
         submit = WebInterfaceSubmitPages()
         youraccount = WebInterfaceYourAccountPages()
@@ -519,6 +526,7 @@ class WebInterfaceInvenio(WebInterfaceSearchInterfacePages):
             images = WebInterfaceImagesPages()
             video = WebInterfaceEmbedVideo()
             api = WebInterfaceAPIPages()
+            news = WebInterfaceWebNewsPages()
 
 # This creates the 'handler' function, which will be invoked directly
 # by mod_python.
