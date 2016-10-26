@@ -34,8 +34,8 @@ _LOCAL_SETTINGS = {
     'service_document_url': 'https://arxiv.org/sword-app/servicedocument',
 }
 
-CFG_ARXIV_ORG_VERBOSE = True
-CFG_ARXIV_ORG_DRY_RUN = True
+CFG_ARXIV_ORG_VERBOSE = False
+CFG_ARXIV_ORG_DRY_RUN = False
 
 
 class ArxivOrg(SwordClientServer):
