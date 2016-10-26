@@ -329,6 +329,7 @@ img_DATA = add-small.png \
            yammer_icon_48.png \
            sign_in_with_google.png \
            youtube-logo-icon-24px.png
+           filter_filled.png
 
 tmpdir=$(localstatedir)/tmp
 
