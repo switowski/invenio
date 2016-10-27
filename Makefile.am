@@ -359,7 +359,7 @@ unistall-youtube:
 	rm -rf ${prefix}/var/www/static/magnific_popup
 	@echo "***********************************************************"
 	@echo "** Youtube client libraries was successfully unistalled  **"
-  @echo "***********************************************************"
+	@echo "***********************************************************"
 
 install-webcomment:
 	@echo "***********************************************************"

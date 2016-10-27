@@ -328,8 +328,8 @@ img_DATA = add-small.png \
            yammer_icon_24.png \
            yammer_icon_48.png \
            sign_in_with_google.png \
-           youtube-logo-icon-24px.png
-           filter_filled.png
+           youtube-logo-icon-24px.png \
+           filter_filled.png \
            yoursearches_alert.png \
            yoursearches_alert_edit.png \
            yoursearches_search.png \
