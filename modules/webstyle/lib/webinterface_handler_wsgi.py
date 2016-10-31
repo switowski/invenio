@@ -18,6 +18,7 @@
 
 """mod_python->WSGI Framework."""
 
+import sys
 import cgi
 import gc
 import inspect
