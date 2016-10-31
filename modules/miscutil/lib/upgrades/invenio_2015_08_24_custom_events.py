@@ -21,8 +21,8 @@
 
 from invenio.webstat import create_customevent
 
-depends_on = ['invenio_release_1_3_0']
-
+#depends_on = ['invenio_release_1_3_0']
+depends_on = []
 
 def info():
     """Return upgrade recipe information."""
