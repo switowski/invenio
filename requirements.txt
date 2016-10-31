@@ -32,5 +32,7 @@ matplotlib
 html2text==2014.7.3
 markdown2==2.2.1
 bleach==1.4
+oauth2client
+google-api-python-client
 git+git://github.com/inveniosoftware-contrib/lumberjack.git#egg=lumberjack
 git+https://github.com/inveniosoftware-contrib/obelix-client.git
