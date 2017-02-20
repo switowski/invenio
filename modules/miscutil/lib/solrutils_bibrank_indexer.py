@@ -232,7 +232,11 @@ def _get_fulltext(recid):
         if urls_to_index:
             write_message("... will extract words from %s:%s" % (recid, ', '.join(urls_to_index)), verbose=2)
         for url in urls_to_index:
-            tmpdoc = download_url(url)
+            try:
+                tmpdoc = download_url(url)
+            except:
+                # We did our best to get the file but something happened, 401?
+                continue
             try:
                 tmptext = convert_file(tmpdoc, output_format='.txt')
                 words.append(open(tmptext).read())
