@@ -120,7 +120,11 @@ def format_element(bfo, name, tag_name='', tag='', kb='', kb_default_output='', 
         if isinstance(value, list):
             for val in value:
                 if isinstance(val, dict):
-                    out.extend(val.values())
+                    if CFG_CERN_SITE and name == 'citation_title':
+                        # citation_title should be in the form title : subtitle
+                        out.append(' : '.join(val.values()))
+                    else:
+                        out.extend(val.values())
                 else:
                     out.append(val)
         elif isinstance(value, dict):
