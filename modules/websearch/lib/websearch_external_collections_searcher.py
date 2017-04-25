@@ -238,9 +238,8 @@ class CERNEDMSSearchEngine(SortedFieldsSearchEngine):
 
     def __init__(self, configuration):
         super(CERNEDMSSearchEngine, self).__init__(configuration)
-        self.base_url = "http://edms.cern.ch/cedar/plsql/fullsearch.doc_search"
-        self.search_url = "http://edms.cern.ch/cedar/plsql/fullsearch.doc_search?p_search_type=ADVANCED&"
-        self.search_url_simple = "http://edms.cern.ch/cedar/plsql/fullsearch.doc_search?p_search_type=BASE&p_free_text="
+        self.base_url = 'http://edms.cern.ch'
+        self.search_url = 'http://edms.cern.ch/search?'
         self.fields = ["author", "keyword", "abstract", "title", "reportnumber"]
 
     def build_search_url(self, basic_search_units, req_args=None, lang=CFG_SITE_LANG, limit=CFG_EXTERNAL_COLLECTION_MAXRESULTS):
@@ -248,21 +247,19 @@ class CERNEDMSSearchEngine(SortedFieldsSearchEngine):
         super(CERNEDMSSearchEngine, self).build_search_url(basic_search_units)
         if len(self.fields_content["default"]) > 0:
             free_text = self.bind_fields(["author", "keyword", "abstract", "title", "reportnumber", "default"])
-            return self.search_url_simple + free_text
+            return '{0}query={1}'.format(self.search_url, free_text)
         else:
-            authors = self.bind_fields(["author"])
-            title = self.bind_fields(["title", "abstract", "keyword"])
-            reportnumber = self.bind_fields(["reportnumber"])
-            url_parts = []
-            if authors != '':
-                url_parts.append('p_author=' + authors)
-            if title != "":
-                url_parts.append('p_title=' + title)
-            if reportnumber != "":
-                url_parts.append('p_document_id=' + reportnumber)
+            author = ('author', self.bind_fields(["author"]))
+            title = ('title', self.bind_fields(["title"]))
+            abstract = ('description', self.bind_fields(["abstract"]))
+            keyword = ('keyword', self.bind_fields(["keyword"]))
+            reportnumber = ('document_id', self.bind_fields(["reportnumber"]))
+
+            url_parts = ['{0}={1}'.format(key, value) for (key, value) in [author, title, abstract, keyword, reportnumber] if value]
+
             if len(url_parts) == 0:
                 return None
-            return self.search_url + "&".join(url_parts)
+            return '{0}{1}'.format(self.search_url, "&".join(url_parts))
 
     def bind_fields(self, fieldname_list):
         """Combine some fields together."""
