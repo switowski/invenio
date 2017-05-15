@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012 CERN.
+# Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -24,6 +24,7 @@ The main APIs are:
   - format_record
   - format_records
   - create_excel
+  - create_contributors_tex
   - get_output_format_content_type
 
 This module wraps the BibFormat engine and its associated
@@ -37,6 +38,8 @@ record basis) should be defined, with name C{def create_*}.
 __revision__ = "$Id$"
 
 import zlib
+
+from string import ascii_letters
 
 from invenio import bibformat_dblayer
 from invenio import bibformat_engine
@@ -277,6 +280,87 @@ def format_with_format_template(format_template_filename, bfo,
                             verbose=verbose,
                             format_template_code=format_template_code)
     return evaluated_format
+
+
+def create_contributors_tex(recIDs, req=None):
+    """Create author contributions export in tex for ATLAS.
+
+    .. example::
+
+        \usepackage{latex/atlascontribute}
+        \usepackage{authblk}
+        \renewcommand\Authands{, } % avoid ``. and'' for last author
+        \renewcommand\Affilfont{\itshape\small} % affiliation formatting
+        \AtlasAuthorContributor{Abc}{b}{Contribution from Abc}
+        \AtlasAuthorContributor{Bcd}{a}{Contribution from Bcd}
+        \AtlasAuthorContributor{Cde}{a}{Contribution from Cde}
+        \AtlasAuthorContributor{Def}{a}{Contribution from Def}
+        \AtlasAuthorContributor{Efg}{a}{Contribution from Efg}
+        \AtlasAuthorContributor{Fgh}{c}{Contribution from Fgh}
+        \AtlasAuthorContributor{Ghi}{a}{Contribution from Ghi}
+        \affil[a]{Affiliation X}
+        \affil[b]{Affiliation Y}
+        \affil[c]{Affiliation Z}
+    """
+    LETTERS = list(ascii_letters)
+
+    TEMPLATES = {
+        'contributor': '\\AtlasAuthorContributor{%s}{%s}{%s}',
+        'affiliation': '\\affil[%s]{%s}'
+    }
+    for recid in recIDs:
+        bfo = bibformat_engine.BibFormatObject(recid)
+        # Get all contributors `100` and `700`
+        contributors = bfo.fields('100') + bfo.fields('700')
+
+        # Find all the possible affiliations
+        affiliations = set()
+
+        # Add all unique affiliations
+        for contributor in contributors:
+            affiliations.add(contributor.get('u'))
+        # Make a list
+        affiliations = list(affiliations)
+
+        # Generate the contributors list
+        contributors_list = []
+        for contributor in contributors:
+            # Get the letter in index
+            letter = LETTERS[affiliations.index(contributor.get('u'))]
+            contributors_list.append(
+                TEMPLATES['contributor'] % (
+                    contributor.get('a'),
+                    letter,
+                    contributor.get('g')
+                )
+            )
+
+        # Generate the affiliations list
+        affiliations_list = []
+        for index, affiliation in enumerate(affiliations):
+            affiliations_list.append(
+                TEMPLATES['affiliation'] % (
+                    LETTERS[index],
+                    affiliation
+                )
+            )
+
+        # Finally return everything together
+        tex = (
+            '\\usepackage{latex/atlascontribute} \n'
+            '\\usepackage{authblk} \n'
+            '\\renewcommand\Authands{, } \n'
+            '\\renewcommand\Affilfont{\itshape\small} \n'
+            '%s \n'
+            '%s'
+        ) % (
+            '\n'.join(contributors_list),
+            '\n'.join(affiliations_list),
+        )
+        req.content_type = get_output_format_content_type('atex')
+        req.headers_out["Content-Disposition"] = "inline; filename=%s" % 'authors.tex'
+        req.send_http_header()
+        req.write(tex)
 
 
 def create_excel(recIDs, req=None, ot=None, ot_sep="; ", user_info=None):

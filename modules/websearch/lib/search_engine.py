@@ -116,7 +116,10 @@ from invenio.bibindex_engine_utils import author_name_requires_phrase_search, \
 from invenio.bibindex_engine_washer import wash_index_term, lower_index_term, wash_author_name
 from invenio.bibindex_engine_config import CFG_BIBINDEX_SYNONYM_MATCH_TYPE
 from invenio.bibindex_engine_utils import get_idx_indexer
-from invenio.bibformat import format_record, format_records, get_output_format_content_type, create_excel
+from invenio.bibformat import (
+    format_record, format_records, get_output_format_content_type,
+    create_excel, create_contributors_tex
+)
 from invenio.bibrank_downloads_grapher import create_download_history_graph_and_box
 from invenio.bibknowledge import get_kbr_values
 from invenio.data_cacher import DataCacher
@@ -363,7 +366,7 @@ def is_user_viewer_of_record(user_info, recid):
         if CFG_CERN_SITE:
             #the egroup might be in the form egroup@cern.ch
             if email_or_group.replace('@cern.ch', ' [CERN]') in user_info['group']:
-                return True            
+                return True
     return False
 
 def check_user_can_view_record(user_info, recid):
@@ -4627,6 +4630,8 @@ def print_records(req, recIDs, jrec=1, rg=CFG_WEBSEARCH_DEF_RECORDS_IN_GROUPS, f
                                        user_info=user_info, verbose=verbose,
                                        sf=sf, so=so, sp=sp, rm=rm))
             req.write(']')
+        elif format == 'atex':
+            create_contributors_tex(recIDs=recIDs, req=req)
         elif format == 'excel':
             create_excel(recIDs=recIDs, req=req, ot=ot, user_info=user_info)
         else:
