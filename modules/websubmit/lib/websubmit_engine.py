@@ -2042,19 +2042,20 @@ def get_authors_from_allowed_sources(
         return (result, error)
 
     # Retrieve the user that started this submission and match them to the user
-    # running this query.
-    SuE = ParamFromFile(
-        os.path.join(
-            CFG_WEBSUBMIT_STORAGEDIR,
-            relative_curdir,
-            "SuE"
+    # running this query if not using cdslabs.
+    if 'cdslabs' not in relative_curdir:
+        SuE = ParamFromFile(
+            os.path.join(
+                CFG_WEBSUBMIT_STORAGEDIR,
+                relative_curdir,
+                "SuE"
+            )
         )
-    )
-    user_info = collect_user_info(req)
-    email = user_info["email"]
-    if email != SuE:
-        error = "The current user is not authorized to perform this query"
-        return (result, error)
+        user_info = collect_user_info(req)
+        email = user_info["email"]
+        if email != SuE:
+            error = "The current user is not authorized to perform this query"
+            return (result, error)
 
     # Load the author sources plugins
     author_sources_plugins = PluginContainer(
