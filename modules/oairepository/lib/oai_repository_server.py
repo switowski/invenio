@@ -179,7 +179,7 @@ def get_earliest_datestamp():
     Return empty string if no records or earliest datestamp in UTC.
     """
     out = ""
-    res = run_sql("SELECT DATE_FORMAT(MIN(creation_date),'%Y-%m-%d %H:%i:%s') FROM bibrec", n=1)
+    res = run_sql("SELECT DATE_FORMAT(MIN(modification_date),'%Y-%m-%d %H:%i:%s') FROM bibrec", n=1)
     if res:
         out = localtime_to_utc(res[0][0])
     return out
