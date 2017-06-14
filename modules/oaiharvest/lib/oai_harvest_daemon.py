@@ -399,7 +399,7 @@ def harvest_step(repository, harvestpath, identifiers, dates, current_progress):
             str(repository["lastrun"]))  # remove trailing .00
         timeinsec = int(repository["frequency"]) * 60 * 60
         updatedue = add_timestamp_and_timelag(lastrundate, timeinsec)
-        proceed = compare_timestamps_with_tolerance(updatedue, timenow)
+        proceed = compare_timestamps_with_tolerance(updatedue, timenow, 120)  # adds a tolerance of 2h
         if proceed != 1:
             # update needed!
             write_message("source %s is going to be updated" % (repository["name"],))
