@@ -1,5 +1,5 @@
 # This file is part of Invenio.
-# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2010, 2011 CERN.
+# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2010, 2011, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -15,10 +15,8 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-__revision__ = "$Id$"
-
-from invenio.config import \
-     CFG_SITE_NAME
+from invenio.config import CFG_SITE_NAME, CFG_SITE_URL, CFG_SITE_RECORD
+from invenio.websubmit_functions.Shared_Functions import ParamFromFile
 
    ## Description:   function Print_Success_MBI
    ##                This function displays a message telling the user the
@@ -33,7 +31,12 @@ def Print_Success_MBI(parameters, curdir, form, user_info=None):
     (MBI) action.
     """
     global rn
-    t="<b>Modification completed!</b><br /><br />"
-    t+="These modifications on document %s will be processed as quickly as possible and made <br />available on the %s Server</b>" % (rn, CFG_SITE_NAME)
+    sysno = ParamFromFile("%s/%s" % (curdir, 'SN')).strip()
+    t = "<b>Modification completed!</b><br /><br />"
+    if sysno:
+        # If we know the URL of the document, we display it for user's convenience (RQF0800417)
+        url = '%s/%s/%s' % (CFG_SITE_URL, CFG_SITE_RECORD, sysno)
+        t += "These modifications on document %s (<b><a href='%s'>%s</a></b>) will be processed as quickly as possible and made <br />available on the %s.</b>" % (rn, url, url, CFG_SITE_NAME)
+    else:
+        t += "These modifications on document %s will be processed as quickly as possible and made <br />available on the %s.</b>" % (rn, CFG_SITE_NAME)
     return t
-
