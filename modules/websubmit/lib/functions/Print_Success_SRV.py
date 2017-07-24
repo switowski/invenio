@@ -1,5 +1,5 @@
 # This file is part of Invenio.
-# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2010, 2011 CERN.
+# Copyright (C) 2004, 2005, 2006, 2007, 2008, 2010, 2011, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,11 +17,15 @@
 
 __revision__ = "$Id$"
 
+from invenio.config import CFG_SITE_URL, CFG_SITE_RECORD
+from invenio.websubmit_functions.Shared_Functions import ParamFromFile
+
    ## Description:   function Print_Success_SRV
    ##                This function displays a message telling the user the
    ##             revised files have been correctly received
    ## Author:         T.Baron
    ## PARAMETERS:    -
+
 
 def Print_Success_SRV(parameters, curdir, form, user_info=None):
     """
@@ -30,6 +34,12 @@ def Print_Success_SRV(parameters, curdir, form, user_info=None):
     (SRV) action.
     """
     global rn
-    t="<br /><br /><b>Document %s was successfully revised.</b>" % rn
+    sysno = ParamFromFile("%s/%s" % (curdir, 'SN')).strip()
+    t = "<b>Modification completed!</b><br /><br />"
+    if sysno:
+        # If we know the URL of the document, we display it for user's convenience (RQF0800417)
+        url = '%s/%s/%s' % (CFG_SITE_URL, CFG_SITE_RECORD, sysno)
+        t = "<br /><br /><b>Document %s (<b><a href='%s'>%s</a></b>) was successfully revised.</b>" % (rn, url, url)
+    else:
+        t = "<br /><br /><b>Document %s was successfully revised.</b>" % rn
     return t
-
