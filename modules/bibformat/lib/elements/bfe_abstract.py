@@ -60,8 +60,46 @@ def format_element(bfo, prefix_en, prefix_fr, suffix_en, suffix_fr, limit, max_c
     except ValueError, e:
         escape_mode_int = 0
 
-    abstract_en = bfo.fields('520__a', escape=escape_mode_int)
-    abstract_en.extend(bfo.fields('520__b', escape=escape_mode_int))
+    abstracts_en = bfo.fields('520', escape=escape_mode_int)
+    # After switching the arXiv harvest to Inspire_arxiv harvest, it's
+    # possible that we will have multiple abstracts (520__a), so we want to
+    # display only one (RQF0811156). So let's try to display the abstract that
+    # comes from Inspire first, if there is none, then the one from CDS, then
+    # the one from ArXiV and finally, if none are from those sources, display
+    # the first one we can find.
+    # It's a terrible piece of code and I apologize for it, but it's Friday 6pm
+    inspire_abstract = []
+    cds_abstract = []
+    arxiv_abstract = []
+    any_abstract = []
+    # If the abstract has field 520__b, we want to display it always
+    additional_abstracts = []
+    for abstract in abstracts_en:
+        if abstract.get('b'):
+            additional_abstracts.append(abstract.get('b'))
+        if abstract.get('9') == 'Inspire' and abstract.get('a'):
+            inspire_abstract = [abstract.get('a')]
+        if abstract.get('9') == 'arXiv' and abstract.get('a'):
+            arxiv_abstract = [abstract.get('a')]
+        if abstract.get('9') and abstract.get('a'):
+            any_abstract = [abstract.get('a')]
+        if abstract.get('a') and not abstract.get('9'):
+            cds_abstract = [abstract.get('a')]
+
+    if inspire_abstract:
+        abstract_en = inspire_abstract
+    elif cds_abstract:
+        abstract_en = cds_abstract
+    elif arxiv_abstract:
+        abstract_en = arxiv_abstract
+    elif any_abstract:
+        abstract_en = any_abstract
+    else:
+        abstract_en = []
+
+    if abstract_en and additional_abstracts:
+        abstract_en.extend(additional_abstracts)
+
     abstract_en = separator_en.join(abstract_en)
 
     abstract_fr = bfo.fields('590__a', escape=escape_mode_int)
